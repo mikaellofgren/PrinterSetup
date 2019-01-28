@@ -10,4 +10,4 @@ From the preferences settings you can choose to generate a signed pkg and enable
 You can also use it to export any bashscript by simply paste your bashscript to the Final settings field<br>
 and give the output a name in the Cups print queue name field and then choose the export options.<br>
 
-
+<img src="https://user-images.githubusercontent.com/6194908/51832228-6bf39180-22f4-11e9-8b70-b3b1d56e444e.png" width="90%"></img> 
