@@ -696,7 +696,13 @@ try
     <key>icon_name</key>
     <string></string>
     <key>installcheck_script</key>
-    <string></string>
+    <string>#!/bin/bash
+    PRINTER_INSTALLED=$(/usr/bin/lpstat -p | /usr/bin/awk '{print $2}' | /usr/bin/grep \""& choosenPrinter &"\" | /usr/bin/head -1 )
+if [ \"$PRINTER_INSTALLED\" = \""& choosenPrinter &"\" ]; then
+        echo \"Printer "& choosenPrinter &" already installed\"
+        exit 1
+        fi
+        exit</string>
     <key>installer_type</key>
     <string>nopkg</string>
     <key>minimum_os_version</key>
@@ -716,7 +722,7 @@ exit 0</string>
     <string>uninstall_script</string>
     <key>uninstall_script</key>
     <string>#!/bin/bash
-lpadmin -x "& choosenPrinter &"
+/usr/sbin/lpadmin -x \""& choosenPrinter &"\"
 exit 0</string>
     <key>uninstallable</key>
     <true/>
