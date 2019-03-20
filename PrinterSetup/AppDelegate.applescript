@@ -750,8 +750,9 @@ exit 0</string>
     set eof of theOpenedFile to 0
     write theText to theOpenedFile starting at eof as «class utf8»
     close access theOpenedFile
-    set finalCheck to do shell script "/usr/bin/plutil -lint "& finalCheckPath &" | awk '{print $2}'"
-    if finalCheck is "OK" then
+    set finalCheck to do shell script "/usr/bin/plutil -lint -s " & quoted form of finalCheckPath
+     log finalCheck
+    if finalCheck is "" then
         log ""& finalCheckPath &" is OK"
         display notification "Succesfully exported munki pkg info to: "& finalCheckPath &""
     return true
