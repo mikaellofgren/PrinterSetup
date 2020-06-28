@@ -1,3 +1,4 @@
+<img src="https://github.com/mikaellofgren/PrinterSetup/blob/master/images/printersetupicon.png" width="50%"></img><br>
 # PrinterSetup<br>
 
 A simple printer utility that generates lpadmin output to add printers.<br>
