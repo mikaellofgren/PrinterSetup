@@ -16,8 +16,8 @@ and give the output a name in the Cups print queue name field and then choose th
 
 Download latest version here: https://github.com/mikaellofgren/PrinterSetup/releases
 
-System requirements: 10.13 or later
-Icon: vecteezy.com
+System requirements: 10.13 or later<br>
+Icon: vecteezy.com<br>
 
 
 
