@@ -14,6 +14,13 @@ and give the output a name in the Cups print queue name field and then choose th
 <img src="https://github.com/mikaellofgren/PrinterSetup/blob/master/images/printersetupinterface.png" width="50%"></img><br>
 
 
+Download latest version here: https://github.com/mikaellofgren/PrinterSetup/releases
+
+System requirements: 10.13 or later
+Icon: vecteezy.com
+
+
+
 ## Export for manual distribution
 If you want to export for manual distribution, make sure you got the printerdriver installer<br>
 then add this command before the lpadmin command, and change: CHANGE_ME_TO_PRINTERDRIVER_NAME<br>

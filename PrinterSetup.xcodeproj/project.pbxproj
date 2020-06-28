@@ -7,68 +7,64 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7381D76D21D2B58A002870FD /* AppleScriptObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7381D76C21D2B58A002870FD /* AppleScriptObjC.framework */; };
-		7381D77021D2B58A002870FD /* AppDelegate.applescript in Sources */ = {isa = PBXBuildFile; fileRef = 7381D76F21D2B58A002870FD /* AppDelegate.applescript */; };
-		7381D77221D2B58E002870FD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7381D77121D2B58E002870FD /* Assets.xcassets */; };
-		7381D77521D2B58E002870FD /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7381D77321D2B58E002870FD /* MainMenu.xib */; };
-		7381D77821D2B58E002870FD /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7381D77721D2B58E002870FD /* main.m */; };
+		7300824C244B1CD900F4909F /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7300824B244B1CD900F4909F /* Preferences.swift */; };
+		7324FB882447774B00224F28 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7324FB872447774B00224F28 /* Keychain.swift */; };
+		738A1AD4242E66FC001FF65B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 738A1AD3242E66FC001FF65B /* AppDelegate.swift */; };
+		738A1AD6242E66FD001FF65B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 738A1AD5242E66FD001FF65B /* Assets.xcassets */; };
+		738A1AD9242E66FD001FF65B /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 738A1AD7242E66FD001FF65B /* MainMenu.xib */; };
+		738A1AE2242F387F001FF65B /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 738A1AE1242F387E001FF65B /* Functions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7381D76921D2B58A002870FD /* PrinterSetup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrinterSetup.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		7381D76C21D2B58A002870FD /* AppleScriptObjC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptObjC.framework; path = System/Library/Frameworks/AppleScriptObjC.framework; sourceTree = SDKROOT; };
-		7381D76F21D2B58A002870FD /* AppDelegate.applescript */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.applescript; path = AppDelegate.applescript; sourceTree = "<group>"; };
-		7381D77121D2B58E002870FD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		7381D77421D2B58E002870FD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		7381D77621D2B58E002870FD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		7381D77721D2B58E002870FD /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		7300824B244B1CD900F4909F /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
+		7324FB872447774B00224F28 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		738A1AD0242E66FC001FF65B /* PrinterSetup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrinterSetup.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		738A1AD3242E66FC001FF65B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		738A1AD5242E66FD001FF65B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		738A1AD8242E66FD001FF65B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		738A1ADA242E66FD001FF65B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		738A1ADB242E66FD001FF65B /* PrinterSetup.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PrinterSetup.entitlements; sourceTree = "<group>"; };
+		738A1AE1242F387E001FF65B /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		7381D76621D2B58A002870FD /* Frameworks */ = {
+		738A1ACD242E66FC001FF65B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7381D76D21D2B58A002870FD /* AppleScriptObjC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7381D76021D2B58A002870FD = {
+		738A1AC7242E66FC001FF65B = {
 			isa = PBXGroup;
 			children = (
-				7381D76E21D2B58A002870FD /* PrinterSetup */,
-				7381D76B21D2B58A002870FD /* Frameworks */,
-				7381D76A21D2B58A002870FD /* Products */,
+				738A1AD2242E66FC001FF65B /* PrinterSetup */,
+				738A1AD1242E66FC001FF65B /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		7381D76A21D2B58A002870FD /* Products */ = {
+		738A1AD1242E66FC001FF65B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7381D76921D2B58A002870FD /* PrinterSetup.app */,
+				738A1AD0242E66FC001FF65B /* PrinterSetup.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		7381D76B21D2B58A002870FD /* Frameworks */ = {
+		738A1AD2242E66FC001FF65B /* PrinterSetup */ = {
 			isa = PBXGroup;
 			children = (
-				7381D76C21D2B58A002870FD /* AppleScriptObjC.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		7381D76E21D2B58A002870FD /* PrinterSetup */ = {
-			isa = PBXGroup;
-			children = (
-				7381D76F21D2B58A002870FD /* AppDelegate.applescript */,
-				7381D77121D2B58E002870FD /* Assets.xcassets */,
-				7381D77321D2B58E002870FD /* MainMenu.xib */,
-				7381D77621D2B58E002870FD /* Info.plist */,
-				7381D77721D2B58E002870FD /* main.m */,
+				738A1AE1242F387E001FF65B /* Functions.swift */,
+				738A1AD3242E66FC001FF65B /* AppDelegate.swift */,
+				7324FB872447774B00224F28 /* Keychain.swift */,
+				7300824B244B1CD900F4909F /* Preferences.swift */,
+				738A1AD5242E66FD001FF65B /* Assets.xcassets */,
+				738A1AD7242E66FD001FF65B /* MainMenu.xib */,
+				738A1ADA242E66FD001FF65B /* Info.plist */,
+				738A1ADB242E66FD001FF65B /* PrinterSetup.entitlements */,
 			);
 			path = PrinterSetup;
 			sourceTree = "<group>";
@@ -76,13 +72,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7381D76821D2B58A002870FD /* PrinterSetup */ = {
+		738A1ACF242E66FC001FF65B /* PrinterSetup */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7381D77B21D2B58E002870FD /* Build configuration list for PBXNativeTarget "PrinterSetup" */;
+			buildConfigurationList = 738A1ADE242E66FD001FF65B /* Build configuration list for PBXNativeTarget "PrinterSetup" */;
 			buildPhases = (
-				7381D76521D2B58A002870FD /* Sources */,
-				7381D76621D2B58A002870FD /* Frameworks */,
-				7381D76721D2B58A002870FD /* Resources */,
+				738A1ACC242E66FC001FF65B /* Sources */,
+				738A1ACD242E66FC001FF65B /* Frameworks */,
+				738A1ACE242E66FC001FF65B /* Resources */,
 			);
 			buildRules = (
 			);
@@ -90,24 +86,25 @@
 			);
 			name = PrinterSetup;
 			productName = PrinterSetup;
-			productReference = 7381D76921D2B58A002870FD /* PrinterSetup.app */;
+			productReference = 738A1AD0242E66FC001FF65B /* PrinterSetup.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		7381D76121D2B58A002870FD /* Project object */ = {
+		738A1AC8242E66FC001FF65B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1010;
+				LastSwiftUpdateCheck = 1130;
+				LastUpgradeCheck = 1150;
 				ORGANIZATIONNAME = "Mikael Löfgren";
 				TargetAttributes = {
-					7381D76821D2B58A002870FD = {
-						CreatedOnToolsVersion = 10.1;
+					738A1ACF242E66FC001FF65B = {
+						CreatedOnToolsVersion = 11.3.1;
 					};
 				};
 			};
-			buildConfigurationList = 7381D76421D2B58A002870FD /* Build configuration list for PBXProject "PrinterSetup" */;
+			buildConfigurationList = 738A1ACB242E66FC001FF65B /* Build configuration list for PBXProject "PrinterSetup" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -115,45 +112,47 @@
 				en,
 				Base,
 			);
-			mainGroup = 7381D76021D2B58A002870FD;
-			productRefGroup = 7381D76A21D2B58A002870FD /* Products */;
+			mainGroup = 738A1AC7242E66FC001FF65B;
+			productRefGroup = 738A1AD1242E66FC001FF65B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7381D76821D2B58A002870FD /* PrinterSetup */,
+				738A1ACF242E66FC001FF65B /* PrinterSetup */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		7381D76721D2B58A002870FD /* Resources */ = {
+		738A1ACE242E66FC001FF65B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7381D77221D2B58E002870FD /* Assets.xcassets in Resources */,
-				7381D77521D2B58E002870FD /* MainMenu.xib in Resources */,
+				738A1AD6242E66FD001FF65B /* Assets.xcassets in Resources */,
+				738A1AD9242E66FD001FF65B /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		7381D76521D2B58A002870FD /* Sources */ = {
+		738A1ACC242E66FC001FF65B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7381D77821D2B58E002870FD /* main.m in Sources */,
-				7381D77021D2B58A002870FD /* AppDelegate.applescript in Sources */,
+				738A1AD4242E66FC001FF65B /* AppDelegate.swift in Sources */,
+				738A1AE2242F387F001FF65B /* Functions.swift in Sources */,
+				7300824C244B1CD900F4909F /* Preferences.swift in Sources */,
+				7324FB882447774B00224F28 /* Keychain.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		7381D77321D2B58E002870FD /* MainMenu.xib */ = {
+		738A1AD7242E66FD001FF65B /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				7381D77421D2B58E002870FD /* Base */,
+				738A1AD8242E66FD001FF65B /* Base */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
@@ -161,7 +160,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		7381D77921D2B58E002870FD /* Debug */ = {
+		738A1ADC242E66FD001FF65B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -193,9 +192,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -217,10 +216,12 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		7381D77A21D2B58E002870FD /* Release */ = {
+		738A1ADD242E66FD001FF65B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -252,9 +253,9 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -269,65 +270,75 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Release;
 		};
-		7381D77C21D2B58E002870FD /* Debug */ = {
+		738A1ADF242E66FD001FF65B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PrinterSetup/PrinterSetup.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = PrinterSetup/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				PRODUCT_BUNDLE_IDENTIFIER = se.mikaellofgren.PrinterSetup;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = se.dicom.PrinterSetup;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		7381D77D21D2B58E002870FD /* Release */ = {
+		738A1AE0242E66FD001FF65B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PrinterSetup/PrinterSetup.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = PrinterSetup/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				PRODUCT_BUNDLE_IDENTIFIER = se.mikaellofgren.PrinterSetup;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = se.dicom.PrinterSetup;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7381D76421D2B58A002870FD /* Build configuration list for PBXProject "PrinterSetup" */ = {
+		738A1ACB242E66FC001FF65B /* Build configuration list for PBXProject "PrinterSetup" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				7381D77921D2B58E002870FD /* Debug */,
-				7381D77A21D2B58E002870FD /* Release */,
+				738A1ADC242E66FD001FF65B /* Debug */,
+				738A1ADD242E66FD001FF65B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7381D77B21D2B58E002870FD /* Build configuration list for PBXNativeTarget "PrinterSetup" */ = {
+		738A1ADE242E66FD001FF65B /* Build configuration list for PBXNativeTarget "PrinterSetup" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				7381D77C21D2B58E002870FD /* Debug */,
-				7381D77D21D2B58E002870FD /* Release */,
+				738A1ADF242E66FD001FF65B /* Debug */,
+				738A1AE0242E66FD001FF65B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 7381D76121D2B58A002870FD /* Project object */;
+	rootObject = 738A1AC8242E66FC001FF65B /* Project object */;
 }
