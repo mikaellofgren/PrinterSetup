@@ -2,8 +2,8 @@
 //  AppDelegate.swift
 //  PrinterSetup
 //
-//  Created by Mikael Löfgren on 2020-03-27.
-//  Copyright © 2020 Mikael Löfgren. All rights reserved.
+//  Created by Mikael Löfgren on 2024-12-18.
+//  Copyright © 2024 Mikael Löfgren. All rights reserved.
 //
 
 import Cocoa
@@ -22,6 +22,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet var printerLocationTextField: NSTextField!
     @IBOutlet var printerProtocolPopup: NSPopUpButton!
     @IBOutlet var printerIpaddressComboBox: NSComboBox!
+    @IBOutlet weak var printerIconButton: NSButton!
+    @IBOutlet weak var printerIconPathTextField: NSTextField!
     @IBOutlet var exportPopUp: NSPopUpButton!
     
     @IBOutlet var printerIPmenu: NSMenuItem!
@@ -79,6 +81,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     
     
+ 
     
     // Export options
     @IBAction func lookupPrinterIp(_ sender: NSMenuItem) {
@@ -87,20 +90,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBAction func noPayloadPkg(_ sender: Any) {
         exportAsPkg ()
-       }
+    }
    
     @IBAction func munkiPkgInfo(_ sender: Any) {
-    exportAsMunkiPkgInfo ()
+        exportAsMunkiPkgInfo ()
     }
    
     @IBAction func outputAsPrinter(_ sender: Any) {
         addOutputAsPrinter ()
-       }
+    }
    
-  
+    @IBAction func refreshPrinterList(_ sender: Any) {
+        refreshPrinter ()
+    }
+    
     @IBAction func selectedPrinterSender(_ sender: NSPopUpButton) {
       selectedPrinterFunction ()
-                  }
+    }
     
     @IBAction func selectedPPDsender(_ sender: Any) {
         generateFinalOutputTextField ()
@@ -126,9 +132,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         generateFinalOutputTextField ()
     }
     
+    
+    @IBAction func printerIconSender(_ sender: Any) {
+        savePrinterIcon ()
+    }
+    
+    
 func applicationDidFinishLaunching(_ aNotification: Notification) {
     func appDelegate() -> AppDelegate {
             return NSApplication.shared.delegate as! AppDelegate
+        }
+    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+            return false
         }
             // Start everything here
             appDelegate().finalOutputTextField.textStorage?.append(NSAttributedString(string:"Before start we need to index all your PPD files...This message will self-destruct when done"))

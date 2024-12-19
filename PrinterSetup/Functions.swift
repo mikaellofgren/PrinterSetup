@@ -2,8 +2,8 @@
 //  Functions.swift
 //  PrinterSetup
 //
-//  Created by Mikael Löfgren on 2020-03-28.
-//  Copyright © 2020 Mikael Löfgren. All rights reserved.
+//  Created by Mikael Löfgren on 2024-12-18.
+//  Copyright © 2024 Mikael Löfgren. All rights reserved.
 //
 import Cocoa
 import AppKit
@@ -15,9 +15,10 @@ import Foundation
      }
     
     var printersArray = [String] ()
-    var everyprintersArray = [(CupsPrinterName: String, CupsPPD:String,Printername:String,ShortNickName:String,Location:String,Protocol:String,IP:String)] ()
+    var everyprintersArray = [(CupsPrinterName: String, CupsPPD:String,Printername:String,ShortNickName:String,Location:String,Protocol:String,IP:String,Icon:String,Ipp2ppdCreated:Bool)] ()
     var printersProtocolArray = [String] ()
     var printersArrayTemp = [String] ()
+    var printerInfoArrayTemp = [String] ()
     var selectedPrinter = appDelegate().printerslistPopup.titleOfSelectedItem!
     // Variables for tuple printercard
     var cupsprintername = ""
@@ -28,12 +29,15 @@ import Foundation
     var protocolandIp = ""
     var printerprotcol = ""
     var ipaddress = ""
-    var printercard = (CupsPrinterName: cupsprintername, CupsPPD: cupsppd, Printername: printername, ShortNickName: shortnickname, Location: location, Protocol: printerprotcol, IP: ipaddress)
+    var iconpath = ""
+    var ipp2ppdcreated = false
+    var printercard = (CupsPrinterName: cupsprintername, CupsPPD: cupsppd, Printername: printername, ShortNickName: shortnickname, Location: location, Protocol: printerprotcol, IP: ipaddress, Icon: iconpath, Ipp2ppdCreated: ipp2ppdcreated)
     var dnssdName = ""
     var allPPDs = ""
     let ppdListFile = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/PrinterSetup/ppds.txt").path
     let ppdListFilePath = URL(fileURLWithPath: ppdListFile )
     var selectedShortNickName = everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.ShortNickName ?? ""
+    var airPrintDriverIsUsed = (everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.Ipp2ppdCreated ?? false) as Bool
     var protocolArray = ["lpd","dnssd","smb", "ipp","ipps","http","https"]
     var allPPDsArray = [String] ()
     var shortNickNameAndPPDsArray = [(ShortNickName:String, PPD:String)] ()
@@ -44,7 +48,7 @@ import Foundation
     var statusCertificateCheckbox = Int ()
     var statusCupsCheckbox = Int ()
     var cupsWebInterface = shell("cupsctl | grep 'WebInterface'").replacingOccurrences(of: "\n", with: "", options: [.regularExpression, .caseInsensitive])
-    let plistFile  = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("/Library/Preferences/se.dicom.printersetup.plist").path
+    let plistFile  = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("/Library/Preferences/se.mikaellofgren.printersetup.plist").path
     let plistPath = URL(fileURLWithPath: plistFile)
     var versionNumberRead = String ()
     var pkgIdentifierRead = String ()
@@ -53,11 +57,19 @@ import Foundation
     var selectedVariableColor = NSColor.purple
     var pkgSigned = ""
     var pkgUnSigned = ""
-
+    extension String {
+    /// Escapes special characters to make the string XML-compatible.
+    var xmlEscaped: String {
+        return self
+            .replacingOccurrences(of: "&", with: "&amp;")
+    }
+}
 
 
 
 func clearEveryPrinterFields () {
+    appDelegate().printerslistPopup.removeAllItems()
+    appDelegate().printerslistPopup.addItem(withTitle: "[Choose a printer]")
     appDelegate().printerslistPopup.addItems(withTitles: printersArray)
     appDelegate().printerslistPopup.selectItem(at: 0)
     appDelegate().printerPPDPopup.removeAllItems()
@@ -68,7 +80,8 @@ func clearEveryPrinterFields () {
     appDelegate().printerIpaddressComboBox.removeAllItems()
     appDelegate().printerIpaddressComboBox.addItem(withObjectValue:"")
     appDelegate().printerIpaddressComboBox.selectItem(withObjectValue:"")
-    
+    appDelegate().printerIconButton.image = nil
+    appDelegate().printerIconPathTextField.stringValue = ""
     
     if cupsWebInterface == "WebInterface=no" {
         appDelegate().enableCupsWebbutton.state = NSControl.StateValue.off
@@ -101,18 +114,19 @@ func createprinterPPDsPopup () {
     appDelegate().printerPPDPopup.selectItem(at: 0)
     }
 
+
 func createPrinterProtocolPopup () {
         appDelegate().printerProtocolPopup.removeAllItems()
         appDelegate().printerProtocolPopup.addItem(withTitle: everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.Protocol ?? "")
         appDelegate().printerProtocolPopup.addItems(withTitles: protocolArray)
         appDelegate().printerProtocolPopup.selectItem(withTitle: everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.Protocol ?? "")
-    if appDelegate().printerProtocolPopup.titleOfSelectedItem! == "dnssd" {
-        appDelegate().printerIPmenu.isHidden=false
-    } else {
-        appDelegate().printerIPmenu.isHidden=true
-    }
-    
-    }
+        if appDelegate().printerProtocolPopup.titleOfSelectedItem! == "dnssd" {
+            appDelegate().printerIPmenu.isHidden=false
+        } else {
+            appDelegate().printerIPmenu.isHidden=true
+        }
+}
+
 
 func createprinterIpaddressComboBox () {
         appDelegate().printerIpaddressComboBox.removeAllItems()
@@ -192,22 +206,166 @@ func generateFinalOutputTextField () {
             appDelegate().finalOutputTextField.string = ""
                   return }
         
-        // Get Printer Options
+        if airPrintDriverIsUsed == true && finalProtocolName == "ipps" || finalProtocolName == "ipp"  {
+            // # Inspired by: https://aporlebeke.wordpress.com/2021/05/26/configuring-printers-programmatically-for-airprint-part-2-now-with-icons/
+            finalOutputString = """
+            #!/bin/bash
+            # Script created by PrinterSetup
+            PRINTERNAME="\(finalPrinterName)"
+            PRINTER_CUPSNAME="\(finalCupsName)"
+            PRINTER_IP="\(finalIpAddress)"
+            PRINTER_LOCATION="\(finalLocation)"
+            PRINTER_PROTOCOL="\(finalProtocolName)"
+            PRINTER_PLIST="/tmp/$PRINTERNAME.plist"
+            PRINTER_TEMP_PPD="/tmp/$PRINTERNAME.ppd"
+
+            PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/libexec/ export PATH
+
+            # Functions
+            GET_PRINTER_ATTRIBUTES () {
+            # Check that printer are online and responds to ipp output attributes and save to a tmp plist file
+            PRINTER_ONLINE_AND_IPP=$(ipptool -P "$PRINTER_PLIST" ipp://"$PRINTER_IP"/ipp/print get-printer-attributes.test | grep "PASS")
+
+            RETRIES=0
+            RETRY_MAX=60 # 60 seconds
+              
+            while [ -z "$PRINTER_ONLINE_AND_IPP" ]; do
+                PRINTER_ONLINE_AND_IPP=$(ipptool -P "$PRINTER_PLIST" ipp://"$PRINTER_IP"/ipp/print get-printer-attributes.test | grep "PASS")
+                RETRIES=$(( RETRIES + 1 ))
+                if [ "$RETRIES" -gt "$RETRY_MAX" ] ; then
+                    echo "Couldn't reach printer with ip: $PRINTER_IP after $RETRY_MAX attempts"
+                    exit 1
+                          else
+                       echo "Retry $RETRIES of $RETRY_MAX"
+                    sleep 1
+                  fi
+            done
+              
+            echo "Successfully connected to: $PRINTERNAME with ip: $PRINTER_IP and printer is supporting IPP"
+            }
+
+
+            GENERATE_PRINTER_PPD () {
+            # Generate the AirPrint PPD using ipp2ppd
+            /System/Library/Printers/Libraries/ipp2ppd "ipp://$PRINTER_IP" everywhere > "$PRINTER_TEMP_PPD" 
+
+            # Verify the temp PPD exist
+            if [ -f "$PRINTER_TEMP_PPD" ]; then
+                echo "Generated Airprint PPD file to $PRINTER_TEMP_PPD"
+                    else
+                echo "The $PRINTER_TEMP_PPD doesn't exist, exit"
+                exit 1
+            fi
+            }
+
+
+            GET_PRINTER_ICON () {
+            # Get Icon URL from printers attributes plist
+            ICON_LARGE_URL=$(PlistBuddy -c "Print :Tests:0:ResponseAttributes:1:printer-icons:1" "$PRINTER_PLIST" 2>/dev/null)
+            ICON_SMALL_URL=$(PlistBuddy -c "Print :Tests:0:ResponseAttributes:1:printer-icons:0" "$PRINTER_PLIST" 2>/dev/null)
+
+            if [ -n "$ICON_LARGE_URL" ]; then
+                ICON_URL="$ICON_LARGE_URL"
+            elif [ -n "$ICON_SMALL_URL" ]; then
+                ICON_URL="$ICON_SMALL_URL"
+            fi
+
+            echo "Printericon URL: $ICON_URL"
+
+            # Make sure /Library/Printers/Icons exist (requires sudo)
+            if [ ! -e "/Library/Printers/Icons" ]; then
+                mkdir -p "/Library/Printers/Icons"
+                chmod 555 "/Library/Printers/Icons"
+                chown root:wheel "/Library/Printers/Icons"
+            fi
+
+            # Download Icon with curl from printer
+            PNG="/tmp/$PRINTERNAME.png"
+            ICNS="/Library/Printers/Icons/$PRINTERNAME.icns"
+            GET_ICON=$(curl --write-out '%{http_code}' -skL "$ICON_URL" -o "$PNG")
+
+            if [[ "$GET_ICON" = 200 ]] && [ -f "$PNG" ]; then
+                echo "Successfully downloaded: $PNG"
+                # Convert png to .icns and save to /Library/Printers/Icons/ (requires sudo)
+                sips -s format icns "$PNG" -o "$ICNS"
+                    else
+                echo "Failed to download: $ICON_URL or missing downloaded $PNG, error: $GET_ICON"
+            fi
+
+            # Add the Iconpath to PPD file
+            if [ -f "$ICNS" ]; then
+                CURRENT_ICON_PATH=$(grep "^*APPrinterIconPath" "$PRINTER_TEMP_PPD")
+                if [ -n "$CURRENT_ICON_PATH" ]; then
+                    # Replace the line if it exists
+                    sed -i '' "s|$CURRENT_ICON_PATH|*APPrinterIconPath: \\"/Library/Printers/Icons/$PRINTERNAME.icns\\"|" "$PRINTER_TEMP_PPD"
+                    echo "Line replaced in $PRINTER_TEMP_PPD"
+                        else
+                    # Append the new line if it doesn't exist
+                    echo "*APPrinterIconPath: \\"/Library/Printers/Icons/$PRINTERNAME.icns\\"" >> "$PRINTER_TEMP_PPD"
+                    echo "Line added to $PRINTER_TEMP_PPD"
+                fi
+            fi
+            }
+
+
+            ROOT_CHECK_TO_GET_ICON () {
+            # Check that the script is running as root
+            if [ "$(id -u)" != 0 ]; then
+                echo "Functions to get printer icon must run as root."
+                echo "Please run with sudo, skipping for now..."
+                    else
+                GET_PRINTER_ICON     
+             fi
+            }
+
+
+            # Add the printer
+            ADD_PRINTER () {
+            lpadmin -p "$PRINTER_CUPSNAME" \\
+            -E \\
+            -D "$PRINTERNAME" \\
+            -P "/tmp/$PRINTERNAME.ppd" \\
+            -L "$PRINTER_LOCATION" \\
+            -v "$PRINTER_PROTOCOL"://"$PRINTER_IP" \\
+            -o printer-is-shared=False 2>/dev/null 
+            }
+
+            # Main starts here
+            GET_PRINTER_ATTRIBUTES
+            GENERATE_PRINTER_PPD
+            ROOT_CHECK_TO_GET_ICON
+            ADD_PRINTER 
+
+            exit
+            """
+        } else {
+            finalOutputString = """
+            #!/bin/bash
+            # Script created by PrinterSetup\n
+            """
+            finalOutputString += "/usr/sbin/lpadmin -p \"FINAL_CUPS_NAME\" \\\n"
+            finalOutputString += "-E \\\n"
+            finalOutputString += "-D \"FINAL_PRINTER_NAME\" \\\n"
+            finalOutputString += "-P \"\(finalPPDName)\" \\\n"
+        }
+        if airPrintDriverIsUsed == true && finalProtocolName == "ipps" || finalProtocolName == "ipp"  {
+            // Output for Airprint
+            appDelegate().finalOutputTextField.string = ""
+            appDelegate().finalOutputTextField.textStorage?.append(NSAttributedString(string: finalOutputString, attributes: commandAttributes))
+        } else {
+    // Get Printer Options
         generatePrinterOptions ()
-        
-        finalOutputString = """
-        #!/bin/bash
-        # Script created by PrinterSetup\n
-        """
-        finalOutputString += "/usr/sbin/lpadmin -p \"FINAL_CUPS_NAME\" \\\n"
-        finalOutputString += "-E \\\n"
-        finalOutputString += "-D \"FINAL_PRINTER_NAME\" \\\n"
-        finalOutputString += "-P \"\(finalPPDName)\" \\\n"
 
     // Output Location if Locations contains something
         if appDelegate().printerLocationTextField.stringValue != "" {
         finalOutputString += "-L \"LOCATION\" \\\n"
             }
+        
+    // Make finalIpAddress output shell compatible by adding slashes before parentheses
+        finalIpAddress = finalIpAddress.replacingOccurrences(of: "(", with: "\\(")
+        finalIpAddress = finalIpAddress.replacingOccurrences(of: ")", with: "\\)")
+        
+        
         finalOutputString += "-v \(finalProtocolName)://\(finalIpAddress) \\\n"
 
     //   Output options
@@ -218,13 +376,13 @@ func generateFinalOutputTextField () {
                  }
             }
 
-     // Output not shared
-        finalOutputString += "-o printer-is-shared=False \n"
-           
         
+     // Output not shared
+        finalOutputString += "-o printer-is-shared=False 2>/dev/null\n"
+       
         appDelegate().finalOutputTextField.string = ""
         appDelegate().finalOutputTextField.textStorage?.append(NSAttributedString(string: finalOutputString, attributes: commandAttributes))
-    
+        
          // Find Variables and color them
     
     func colorVariabels (range: String, variable: String) {
@@ -251,7 +409,8 @@ func generateFinalOutputTextField () {
                 }
          }
     colorVariabels(range: "printer-is-shared=False", variable: "printer-is-shared=False")
-    }
+        }
+}
 }
 
 
@@ -315,7 +474,9 @@ func lookupDNSSDtoIP () {
             """
             warning.runModal()
             return } else {
+            if airPrintDriverIsUsed == false {
             appDelegate().printerProtocolPopup.setTitle("lpd")
+            } else {appDelegate().printerProtocolPopup.setTitle("ipp")}
             appDelegate().printerIpaddressComboBox.addItem(withObjectValue: dnssdIp.first!)
             appDelegate().printerIpaddressComboBox.selectItem(withObjectValue: dnssdIp.first!)
             appDelegate().exportPopUp.selectItem(at: 0)
@@ -342,7 +503,6 @@ func exportAsPkg () {
             dialog.showsHiddenFiles        = false;
             dialog.canCreateDirectories    = true;
             dialog.nameFieldStringValue = "\(selectedPrinter).pkg"
-          
             
             if (dialog.runModal() == NSApplication.ModalResponse.OK) {
                 let result = dialog.url // Pathname of the file
@@ -350,8 +510,8 @@ func exportAsPkg () {
                     let path = result!.path
                     
                     // Create tempdir
-                     let scriptsFolder = "/tmp/PrinterSetup/se.pkgscleaner/scripts"
-                     let nopayloadFolder = "/tmp/PrinterSetup/se.pkgscleaner/nopayload"
+                     let scriptsFolder = "/tmp/PrinterSetup/com.printersetup/scripts"
+                     let nopayloadFolder = "/tmp/PrinterSetup/com.printersetup/nopayload"
                     
                    
                    if appDelegate().versionTextField.stringValue != "" {
@@ -361,7 +521,7 @@ func exportAsPkg () {
                        if appDelegate().identifierTextField.stringValue != "" {
                            pkgIdentifierRead = appDelegate().identifierTextField.stringValue
                        } else {
-                        pkgIdentifierRead = "se.printersetup"
+                        pkgIdentifierRead = "com.printersetup"
                     }
                     
                     var selectedCertificate = ""
@@ -445,13 +605,13 @@ func exportAsPkg () {
                         warning.informativeText = """
     Before you quit the app, try it manually by copy this command into terminal:
 
-    /usr/bin/pkgbuild --sign \"\(selectedCertificate)\" --identifier se.pkgscleaner --root \(nopayloadFolder) --scripts \(scriptsFolder) \(path)
+    /usr/bin/pkgbuild --sign \"\(selectedCertificate)\" --identifier com.printersetup --root \(nopayloadFolder) --scripts \(scriptsFolder) \(path)
     """
                          } else {
                         warning.informativeText = """
     Before you quit the app, try it manually by copy this command into terminal:
 
-    /usr/bin/pkgbuild --identifier se.pkgscleaner --root \(nopayloadFolder) --scripts \(scriptsFolder) \(path)
+    /usr/bin/pkgbuild --identifier com.printersetup --root \(nopayloadFolder) --scripts \(scriptsFolder) \(path)
     """
                             }
                        
@@ -487,6 +647,11 @@ appDelegate().spinner.startAnimation(appDelegate())
                if manualCupsName != selectedPrinter {
                selectedPrinter = manualCupsName
                }
+   
+    
+
+// Escape ampersand from the output
+let xmlCompatibleString = finalOutputString.xmlEscaped
     
 let pkgInfo = ("""
 <?xml version="1.0" encoding="UTF-8"?>
@@ -520,7 +685,7 @@ exit</string>
         <key>name</key>
         <string>\(selectedPrinter)</string>
         <key>postinstall_script</key>
-        <string>\(finalOutputString)exit 0</string>
+        <string>\(xmlCompatibleString)exit 0</string>
         <key>requires</key>
         <array>
             <string></string>
@@ -645,7 +810,7 @@ func addOutputAsPrinter () {
             info.icon = NSImage(named: "printer")
             info.addButton(withTitle: "OK")
             info.alertStyle = NSAlert.Style.informational
-            info.messageText = "Successfully added printer:"
+            info.messageText = "Successfully try to add the printer, but please verify..."
             info.informativeText = "\(manualCupsName)"
             info.runModal()
         }
@@ -700,6 +865,10 @@ func generatePrinterOptions () {
             if choosenPPD.contains("/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/Generic.ppd") {
                 _ = shell("tr '\\r' '\\n' < '/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/Generic.ppd' >/tmp/PrinterSetup/choosen.ppd")
                 _ = shell("tr '\\r' '\\n' <'\(choosenCupsPPD)' >/tmp/PrinterSetup/cups.ppd")
+            } else {
+                    if choosenPPD.contains("/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/AirPrint.ppd") {
+                        _ = shell("tr '\\r' '\\n' < '/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/AirPrint.ppd' >/tmp/PrinterSetup/choosen.ppd")
+                        _ = shell("tr '\\r' '\\n' <'\(choosenCupsPPD)' >/tmp/PrinterSetup/cups.ppd")
         } else {
                 if choosenPPD.hasSuffix(".gz") {
                     _ = shell("gzip -d <'\(choosenPPD)' | tr '\\r\\n' '\\n' >/tmp/PrinterSetup/choosen.ppd")
@@ -710,7 +879,7 @@ func generatePrinterOptions () {
                 }
             }
         }
-
+        }
 
         let printerOptions = shell("diff '/private/tmp/PrinterSetup/choosen.ppd' '/private/tmp/PrinterSetup/cups.ppd'")
         var printerOptionsArrayTemp = [String] ()
@@ -731,18 +900,34 @@ func generatePrinterOptions () {
 
 
 func getPrinterNameFromPPDs () {
-   if selectedShortNickName == "Generic PostScript Printer" {
-    appDelegate().printerPPDPopup.addItems(withTitles: ["/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/Generic.ppd"] )
-    appDelegate().printerPPDPopup.selectItem(at: 0)
+    appDelegate().printerPPDPopup.removeAllItems()
+    
+    if selectedShortNickName == "Generic PostScript Printer" {
+     appDelegate().printerPPDPopup.removeAllItems()
+     appDelegate().printerPPDPopup.addItems(withTitles: ["/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/Generic.ppd"] )
+     appDelegate().printerPPDPopup.selectItem(at: 0)
+       return
     } else {
-    if selectedShortNickName == "Generic PCL Laser Printer" {
-        appDelegate().printerPPDPopup.addItems(withTitles: ["sample.drv/generpcl.ppd"] )
-        appDelegate().printerPPDPopup.selectItem(at: 0)
-    } else {
-        createprinterPPDsPopup ()
-        }
+        
+        if selectedShortNickName == "Generic PCL Laser Printer" {
+                appDelegate().printerPPDPopup.removeAllItems()
+                appDelegate().printerPPDPopup.addItems(withTitles: ["sample.drv/generpcl.ppd"] )
+                appDelegate().printerPPDPopup.selectItem(at: 0)
+               return
+                    
+        } else {
+            //print(airPrintDriverIsUsed)
+                if airPrintDriverIsUsed == true {
+                    appDelegate().printerPPDPopup.removeAllItems()
+                    appDelegate().printerPPDPopup.addItems(withTitles: ["/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/AirPrint.ppd"] )
+                    appDelegate().printerPPDPopup.selectItem(at: 0)
+                    return
+                } else {
+                        createprinterPPDsPopup () }
+                    }
+                    }
 }
-}
+    
 
 
 func shell(_ command: String) -> String {
@@ -761,9 +946,12 @@ func shell(_ command: String) -> String {
    }
 
 
+
 // Get ShortNickName from CupsPPD, that we later use to find the "real" ppd
-func getShortNickName (CupsPPD: String) -> String {
-    var returnValue = ""
+func getShortNickName (CupsPPD: String) -> (CupsShortNickname: String, iconPath: String, ipp2ppdCreated : Bool)  {
+    var ipp2ppdCreated = false
+    var CupsShortNickname = ""
+    var iconPath = ""
     var path = URL(fileURLWithPath: "")
     // if CupsPPD should be missing path /private/etc/cups/ppd/ then add it
     if CupsPPD.contains("/private/etc/cups/ppd/") {
@@ -771,30 +959,153 @@ func getShortNickName (CupsPPD: String) -> String {
     } else {
         path = URL(fileURLWithPath: "/private/etc/cups/ppd/"+CupsPPD)
     }
-    if FileManager.default.fileExists(atPath: CupsPPD){
+    if FileManager.default.fileExists(atPath: path.path){
     do {
     var ppdfile = try String(contentsOf: path, encoding: .utf8)
         ppdfile = ppdfile.replacingOccurrences(of: "\"", with: "", options: [.regularExpression, .caseInsensitive])
     let cupsArrayTemp = ppdfile.components(separatedBy: CharacterSet.newlines)
      cupsArrayTemp.forEach {
-              if $0.hasPrefix("*ShortNickName:") {
-                 returnValue = ($0.replacingOccurrences(of: "\\*ShortNickName:", with: "", options: [.regularExpression, .caseInsensitive]))
-                 returnValue = (returnValue.replacingOccurrences(of: "\t", with: "", options: [.regularExpression, .caseInsensitive]))
-                 if returnValue.hasPrefix(" ") {
-                 returnValue = String(returnValue.dropFirst())
-                 }
-             }
+        
+        if $0.hasPrefix("*% PPD created by ipp2ppd") {
+            ipp2ppdCreated = true
+       }
+        
+        
+        if $0.hasPrefix("*ShortNickName:") {
+            CupsShortNickname = ($0.replacingOccurrences(of: "\\*ShortNickName:", with: "", options: [.regularExpression, .caseInsensitive]))
+            CupsShortNickname = (CupsShortNickname.replacingOccurrences(of: "\t", with: "", options: [.regularExpression, .caseInsensitive]))
+        if CupsShortNickname.hasPrefix(" ") {
+            CupsShortNickname = String(CupsShortNickname.dropFirst())
+        }
+       }
+        
+        if $0.hasPrefix("*APPrinterIconPath:") {
+            iconPath = ($0.replacingOccurrences(of: "\\*APPrinterIconPath:", with: "", options: [.regularExpression, .caseInsensitive]))
+            iconPath = (iconPath.replacingOccurrences(of: "\t", with: "", options: [.regularExpression, .caseInsensitive]))
+        if iconPath.hasPrefix(" ") {
+            iconPath = String(iconPath.dropFirst())
+        }
+           
+        }
+              
      }
     } catch  {
     }
 }
-    return returnValue
+    return (CupsShortNickname, iconPath, ipp2ppdCreated)
 }
 
+func getIconImage () {
+   if selectedShortNickName == "Generic PostScript Printer" {
+        let image = NSImage(named: "defaultprintericon")
+        appDelegate().printerIconButton.image=image
+        appDelegate().printerIconPathTextField.stringValue = ""
+        return
+     }
+ 
+    if selectedShortNickName == "Generic PCL Laser Printer" {
+        let image = NSImage(named: "defaultinkjetprintericon")
+        appDelegate().printerIconButton.image=image
+        appDelegate().printerIconPathTextField.stringValue = ""
+        return
+     }
+    
+let cupsShortNicknameAndipp2Created = everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.Icon ?? ""
+    if cupsShortNicknameAndipp2Created != "" {
+        let printerIconPath = URL(fileURLWithPath: cupsShortNicknameAndipp2Created)
+    if FileManager.default.fileExists(atPath: printerIconPath.path) {
+            do {
+                let imageData: Data = try Data(contentsOf: printerIconPath )
+                let image = NSImage(data: imageData)
+                appDelegate().printerIconButton.image=image
+                //appDelegate().printerIconButton.image=image
+                appDelegate().printerIconPathTextField.stringValue = cupsShortNicknameAndipp2Created
+            } catch {
+                print("Unable to load data: \(error)")
+            }
+        } else {
+            // Default Icon from "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/PrintCore.framework/Versions/A/Resources/GenericPostscriptPrinter.icns"
+            let image = NSImage(named: "defaultprintericon")
+            appDelegate().printerIconButton.image=image
+            print(cupsShortNicknameAndipp2Created)
+            // show warning, we know the path but icon not found on system
+            }
+            } else {
+        // Default Icon
+        let image = NSImage(named: "defaultprintericon")
+                appDelegate().printerIconButton.image=image
+                appDelegate().printerIconPathTextField.stringValue = "No Icon path value in /etc/cups/ppd/\(selectedPrinter).ppd"
+    }
+    }
+
+
+
+func savePrinterIcon () {
+    if appDelegate().printerIconPathTextField.stringValue == "No Icon path value in /etc/cups/ppd/\(selectedPrinter).ppd" || appDelegate().printerIconPathTextField.stringValue == "" {
+        return
+    }
+    
+    // Save Dialog
+       let dialog = NSSavePanel();
+       dialog.showsResizeIndicator  = true;
+       dialog.showsHiddenFiles      = false;
+       dialog.canCreateDirectories  = true;
+
+    // Default Save value convert to URL and String to get last path component
+    let iconPathURL = URL(fileURLWithPath: everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.Icon ?? "")
+    let iconPath = everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.Icon ?? ""
+    let iconPathOnlyName = iconPathURL.lastPathComponent
+    let iconPathOnlyNameExtension = iconPathURL.pathExtension
+    
+    dialog.nameFieldStringValue = "\(iconPathOnlyName).\(iconPathOnlyNameExtension)"
+   
+    if (dialog.runModal() == NSApplication.ModalResponse.OK) {
+           let result = dialog.url // Pathname of the file
+        
+           if (result != nil) {
+               let path = result!.path
+               
+            let documentDirURL = URL(fileURLWithPath: path)
+               // Copy icon to destination, remove if exist
+            if FileManager.default.fileExists(atPath: documentDirURL.path) {
+            do {
+                try FileManager.default.removeItem(atPath: documentDirURL.path)
+                        } catch {
+                            let info = NSAlert()
+                            info.icon = NSImage(named: "Warning")
+                            info.addButton(withTitle: "OK")
+                            info.alertStyle = NSAlert.Style.informational
+                            info.messageText = "Couldnt copy file"
+                            info.informativeText = "Try with another name or check permissions for the source and destination"
+                            info.runModal()
+                        }
+            }
+             do {
+                try FileManager.default.copyItem(atPath: iconPath, toPath: documentDirURL.path)
+                    } catch {
+                        let info = NSAlert()
+                        info.icon = NSImage(named: "Warning")
+                        info.addButton(withTitle: "OK")
+                        info.alertStyle = NSAlert.Style.informational
+                        info.messageText = "Couldnt copy file"
+                        info.informativeText = "Try with another name or check permissions for the source and destination"
+                        info.runModal()
+                    }
+
+}
+       }
+}
 
 // Get all printers to printersArray
 func getAllPrinters () {
-   var printers = shell("SOFTWARE= LANG=C lpstat -s")
+   // Clear the arrays and variables if refresh
+   var printers = ""
+   printersArray.removeAll()
+   everyprintersArray.removeAll()
+   printersArrayTemp.removeAll()
+   printerInfoArrayTemp.removeAll()
+   selectedPrinter = ""
+   printers = shell("SOFTWARE= LANG=C lpstat -s")
    printers = printers.replacingOccurrences(of: ": ", with: "::", options: [.regularExpression, .caseInsensitive])
    printers = printers.replacingOccurrences(of: "::", with: "|", options: [.regularExpression, .caseInsensitive])
    printers = printers.replacingOccurrences(of: "device for ", with: "", options: [.regularExpression, .caseInsensitive])
@@ -806,8 +1117,9 @@ func getAllPrinters () {
         let printersArrayClean = String(($0.split(separator: "|").first!))
         printersArray += printersArrayClean.components(separatedBy: CharacterSet.newlines)
    }
- 
-
+    
+    
+   
    for everyprinter in printersArray {
 
    // Make a copy of printersArrayTemp to get printer protocol
@@ -819,11 +1131,12 @@ func getAllPrinters () {
     printerprotcol = protocolandIp.components(separatedBy: "://")[0]
     ipaddress = protocolandIp.components(separatedBy: "://")[1]
    }
-
+    
    // Get choosen printers info, where Interface=cupsppd, Description=printername, Location=location
-   var printerInfoArrayTemp = [String] ()
-   var printerInfo = shell("SOFTWARE= LANG=C lpstat -lp '\(everyprinter)'")
+   var printerInfo = ""
+   printerInfo = shell("SOFTWARE= LANG=C lpstat -lp '\(everyprinter)'")
    printerInfo = printerInfo.replacingOccurrences(of: "\t", with: "", options: [.regularExpression, .caseInsensitive])
+   
    printerInfoArrayTemp = printerInfo.components(separatedBy: CharacterSet.newlines)
 
 
@@ -832,7 +1145,9 @@ func getAllPrinters () {
            if $0.hasPrefix("Description:") {printername = ($0.replacingOccurrences(of: "Description: ", with: "", options: [.regularExpression, .caseInsensitive]))}
            if $0.hasPrefix("Location:") {location = ($0.replacingOccurrences(of: "Location: ", with: "", options: [.regularExpression, .caseInsensitive]))}
    }
-    printercard = (CupsPrinterName: everyprinter, CupsPPD: cupsppd, Printername: printername, ShortNickName: getShortNickName(CupsPPD: cupsppd), Location: location, Protocol: printerprotcol, IP: ipaddress)
+    
+    printercard = (CupsPrinterName: everyprinter, CupsPPD: cupsppd, Printername: printername, ShortNickName: getShortNickName(CupsPPD: cupsppd).CupsShortNickname, Location: location, Protocol: printerprotcol, IP: ipaddress, Icon: getShortNickName(CupsPPD: cupsppd).iconPath, Ipp2ppdCreated: getShortNickName(CupsPPD: cupsppd).ipp2ppdCreated)
+    
     everyprintersArray.append(printercard)
     }
    }
@@ -842,21 +1157,33 @@ func getAllPPDs () {
 let documentsPath = "/Library/Printers/PPDs/Contents/Resources"
 let url = URL(fileURLWithPath: documentsPath)
 let fileManager = FileManager.default
-let enumerator: FileManager.DirectoryEnumerator = fileManager.enumerator(atPath: url.path)!
-while let subFolders = enumerator.nextObject() as? String {
-    if subFolders.hasSuffix(".lproj") {
-        // skip only pure folders
+    
+    if fileManager.fileExists(atPath: documentsPath) {
+        let enumerator: FileManager.DirectoryEnumerator = fileManager.enumerator(atPath: url.path)!
+            
+           
+        while let subFolders = enumerator.nextObject() as? String {
+            if subFolders.hasSuffix(".lproj") {
+                // skip only pure folders
+            } else {
+         allPPDs += "\n/Library/Printers/PPDs/Contents/Resources/"+(subFolders)
+            }
+        }
+        allPPDsArray = allPPDs.components(separatedBy: CharacterSet.newlines)
+        allPPDsArray = allPPDsArray.filter({ $0 != ""})
     } else {
- allPPDs += "\n/Library/Printers/PPDs/Contents/Resources/"+(subFolders)
+        return
     }
-}
-allPPDsArray = allPPDs.components(separatedBy: CharacterSet.newlines)
-allPPDsArray = allPPDsArray.filter({ $0 != ""})
+    
+
 }
 
 
 func getAllShortNickNameAndPrinterPPDs () {
     var ppdsAndShortnickname = ""
+    if allPPDsArray.isEmpty {
+        return
+    }
 for ppd in allPPDsArray {
     var tempShortNickName = ""
     
@@ -948,18 +1275,57 @@ do {
       return returnCount
 }
 
+func ppdsTXTfileExist () -> Bool {
+    var exist = false
+    if FileManager.default.fileExists(atPath: ppdListFile) {
+            exist = true
+        }
+    return exist
+}
 
 func runBackgroundPPDindex () {
      DispatchQueue.global(qos: .userInteractive).async {
         getAllPPDs ()
         
-        if allPPDsArray.count == countppdListFileLines() {
+        if ppdsTXTfileExist() == true {
+            if allPPDsArray.count == countppdListFileLines() {
             // Read from file directly
             getAllPPDfromtxtFile ()
-        } else {
+            } else {
                  getAllShortNickNameAndPrinterPPDs ()
         }
+     } else {
+        getAllShortNickNameAndPrinterPPDs ()
+     }
          DispatchQueue.main.async {
+            if allPPDsArray.isEmpty {
+                let info = NSAlert()
+                info.icon = NSImage(named: "Warning")
+                info.addButton(withTitle: "OK")
+                info.alertStyle = NSAlert.Style.informational
+                info.messageText = "Couldnt find any PPDs to index"
+                info.informativeText = """
+                Make sure path exist at
+                '/Library/Printers/PPDs/Contents/Resources'
+                and contains some PPDs and try again
+                """
+                info.runModal()
+            }
+            
+            if ppdsTXTfileExist() == false {
+                let info = NSAlert()
+                info.icon = NSImage(named: "Warning")
+                info.addButton(withTitle: "OK")
+                info.alertStyle = NSAlert.Style.informational
+                info.messageText = "Couldnt find PPDs index file"
+                info.informativeText = """
+                Make sure file exist at
+                '\(ppdListFile)'
+                and contains some info and try again
+                """
+                info.runModal()
+            }
+            
              // Back on the main thread
             appDelegate().finalOutputTextField.string = ""
             appDelegate().spinner.stopAnimation(appDelegate())
@@ -976,6 +1342,7 @@ func selectedPrinterFunction () {
         return }
     
            if selectedPrinter.contains("[Choose a printer]"){
+           
                 clearEveryPrinterFields ()
                 appDelegate().finalOutputTextField.string = ""
                return
@@ -987,11 +1354,24 @@ func selectedPrinterFunction () {
                 createPrinterProtocolPopup ()
                 createprinterIpaddressComboBox ()
                 selectedShortNickName = everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.ShortNickName ?? ""
+                airPrintDriverIsUsed = (everyprintersArray.first{ $0.CupsPrinterName == selectedPrinter }?.Ipp2ppdCreated ?? false) as Bool
                 getPrinterNameFromPPDs ()
+                getIconImage ()
                 generateFinalOutputTextField ()
            }
 }
 
+
+func refreshPrinter () {
+    // Start all over refresh printers, clear Array needs to be done
+    appDelegate().finalOutputTextField.string = ""
+    //runBackgroundPPDindex ()
+    getAllPrinters()
+    clearEveryPrinterFields ()
+    
+    // Reset Export as option
+    appDelegate().exportPopUp.selectItem(at: 0)
+}
 
 func cleanCupsName(_ inputString:String) -> String {
     var outputString = ""
@@ -1011,7 +1391,7 @@ if let regex = try? NSRegularExpression(pattern: "[^0-9.]", options: .caseInsens
 
 func identifierCheck () {
   if appDelegate().identifierTextField.stringValue == "" {
-    appDelegate().identifierTextField.stringValue = "se.printersetup"
+    appDelegate().identifierTextField.stringValue = "com.printersetup"
     }
     }
 

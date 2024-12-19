@@ -2,8 +2,8 @@
 //  Preferences.swift
 //  PrinterSetup
 //
-//  Created by Mikael Löfgren on 2020-04-18.
-//  Copyright © 2020 Mikael Löfgren. All rights reserved.
+//  Created by Mikael Löfgren on 2024-12-18.
+//  Copyright © 2024 Mikael Löfgren. All rights reserved.
 //
 
 import Foundation
