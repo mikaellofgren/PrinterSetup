@@ -16,10 +16,14 @@ and give the output a name in the Cups print queue name field and then choose th
 
 Download latest version here: https://github.com/mikaellofgren/PrinterSetup/releases
 
-System requirements: 10.13 or later<br>
+System requirements: macOS 12 or later<br>
 Icon: vecteezy.com<br>
 
-
+## Airprint   
+Version 2.1 added a custom script for adding printer as Airprint (IPP, IPPS)   
+Admin/sudo permissions is needed to also add printer icon, so run the script as sudo or export as .pkg   
+Inspired from:   
+https://aporlebeke.wordpress.com/2021/05/26/configuring-printers-programmatically-for-airprint-part-2-now-with-icons/   
 
 ## Export for manual distribution
 If you want to export for manual distribution, make sure you got the printerdriver installer<br>
